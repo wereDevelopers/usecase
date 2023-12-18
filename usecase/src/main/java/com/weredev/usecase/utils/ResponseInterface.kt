@@ -1,4 +1,4 @@
-package com.weredev.usecase
+package com.weredev.usecase.utils
 
 import androidx.lifecycle.LifecycleOwner
 
