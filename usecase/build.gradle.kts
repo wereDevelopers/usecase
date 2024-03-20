@@ -1,6 +1,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("maven-publish")
 }
 val javaVersion = JavaVersion.VERSION_17
 android {
@@ -28,6 +29,11 @@ android {
     kotlinOptions {
         jvmTarget = javaVersion.toString()
     }
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
 }
 
 dependencies {
@@ -35,4 +41,17 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+}
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"])
+
+                groupId = "io.github.weredevelopers"
+                artifactId = "usecase"
+                version = "1.0"
+            }
+        }
+    }
 }
