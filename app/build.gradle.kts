@@ -35,7 +35,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":usecase"))
+    //implementation(project(":usecase"))
 
     implementation("androidx.fragment:fragment-ktx:1.6.2")
 
@@ -44,4 +44,5 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation ("com.github.wereDevelopers:usecase:1.0-alpha")
 }
