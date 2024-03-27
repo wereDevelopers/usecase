@@ -50,7 +50,7 @@ afterEvaluate {
 
                 groupId = "io.github.weredevelopers"
                 artifactId = "usecase"
-                version = "1.0"
+                version = "1.1"
             }
         }
     }
