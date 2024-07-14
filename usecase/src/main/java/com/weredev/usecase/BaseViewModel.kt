@@ -12,6 +12,13 @@ import kotlinx.coroutines.withContext
 
 abstract class BaseViewModel : ViewModel() {
 
+    /**
+     * Executes a [BaseAsyncUseCase] and disposes of the coroutine scopewhen finished.
+     *
+     * @param T The type of data returned by the [BaseAsyncUseCase].
+     * @param Y The type of parameter passed to the [BaseAsyncUseCase].
+     * @param mutableLiveData A [MutableLiveData] to observe the result of the [BaseAsyncUseCase].* @param params An optional parameter to pass to the [BaseAsyncUseCase].
+     */
     fun <T, Y> BaseAsyncUseCase<T, Y>.executeAndDispose(
         mutableLiveData: MutableLiveData<Resource<T>>,
         params: Y? = null
