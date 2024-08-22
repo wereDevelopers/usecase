@@ -9,16 +9,17 @@ import com.weredev.usecase_test.ui.common.BaseActivity
 
 class HomeActivity : BaseActivity() {
 
-    private lateinit var homeViewModel: HomeViewModel
+    private val homeViewModel: HomeViewModel by lazy {
+        ViewModelProvider(this)[HomeViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
-        homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
+        findViewById<TextView>(R.id.messageBE).text = homeViewModel.getStartMessage(this)
         homeViewModel.getMessageFromBackEnd("id")
         initObserver()
-        findViewById<TextView>(R.id.messageCache).text =
-            homeViewModel.getMessageCache("id").toString()
+        findViewById<TextView>(R.id.messageCache).text = homeViewModel.getMessageCache("id")
     }
 
     private fun initObserver() {

@@ -11,13 +11,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Observes a [MutableLiveData] containing a [Resource] object.
+ * Extension function for observing a MutableLiveData<Resource<T>> with customizable callbacks for different states.
  *
- * @param T The type of data contained in the [Resource] object.
- * @param responseInterface An interface for handling loading and error states.
- * @param onError An optional lambda function to handle errors.
- * @param onLoading An optional lambda function to handle loading states.
- * @param onSuccess A lambda function to handle successful data emissions.
+ * @param T The type of data contained in the Resource.
+ * @param responseInterface The interface for handling loading and error states.
+ * @param onError Optional callback to handle errors. If not provided, the responseInterface.onError will be used.
+ * @param onLoading Optional callback to handle loading state. If not provided, the responseInterface.onLoading will be used.
+ * @param onSuccess Callback to handle the success state.
  */
 fun <T> MutableLiveData<Resource<T>>.observeWithResource(
     responseInterface: ResponseInterface,
@@ -25,6 +25,7 @@ fun <T> MutableLiveData<Resource<T>>.observeWithResource(
     onLoading: ((isLoading: Boolean) -> Unit)? = null,
     onSuccess: (T?) -> Unit
 ) {
+    this.removeObservers(responseInterface)
     observe(responseInterface) {
         if (it != null) {
             when (it.resourceState) {
@@ -61,13 +62,13 @@ fun <T> MutableLiveData<Resource<T>>.observeWithResource(
 }
 
 /**
- *Executes a [BaseAsyncUseCase] and disposes of the coroutine scope when finished.
+ * Extension function to execute an asynchronous use case and post its result to a MutableLiveData.
  *
- * @param T The type of data returned by the [BaseAsyncUseCase].
- * @param Y The type of parameter passed to the [BaseAsyncUseCase].
- * @param coroutineScope The coroutine scope to use for execution.
- * @param mutableLiveData A [MutableLiveData] to observe the result of the [BaseAsyncUseCase].
- * @param params An optional parameter to pass to the [BaseAsyncUseCase].
+ * @param T The type of the result returned by the use case.
+ * @param Y The type of the parameters passed to the use case.
+ * @param coroutineScope The CoroutineScope in which to execute the use case.
+ * @param mutableLiveData The MutableLiveData to post the results to.
+ * @param params The parameters to pass to the use case. Can be null.
  */
 fun <T, Y> BaseAsyncUseCase<T, Y>.executeAndDispose(
     coroutineScope: CoroutineScope,
@@ -76,20 +77,48 @@ fun <T, Y> BaseAsyncUseCase<T, Y>.executeAndDispose(
 ) {
     coroutineScope.launch {
         mutableLiveData.postValue(Resource.loading())
-        println("BaseViewModel loading")
+        println("executeAndDispose loading")
         val scope = Dispatchers.IO
         try {
             withContext(scope) {
                 val response = this@executeAndDispose.invoke(params)
-                println("BaseViewModel success")
+                println("executeAndDispose success")
                 mutableLiveData.postValue(Resource.success(response))
                 scope.cancel()
             }
         } catch (e: Exception) {
-            println("BaseViewModel error")
-
+            println("executeAndDispose error")
             mutableLiveData.postValue(Resource.error(e))
             scope.cancel()
         }
+    }
+}
+
+/**
+ * Extension function to execute a synchronous use case with error handling.
+ *
+ * @param T The type of the result returned by the use case.
+ * @param Y The type of the parameters passed to the use case.
+ * @param responseInterface The interface for handling errors.
+ * @param params The parameters to pass to the use case. Can be null.
+ * @param onError Optional callback to handle errors. If not provided, the responseInterface.onError will be used.
+ * @return The result of the use case, or null if an error occurred.
+ */
+fun <T, Y> BaseSyncUseCase<T, Y>.executeWithCatch(
+    responseInterface: ResponseInterface,
+    params: Y? = null,
+    onError: ((Throwable) -> Unit)? = null,
+): T? {
+    return try {
+        this@executeWithCatch.invoke(params)
+    } catch (e: Exception) {
+        if(onError != null) {
+            onError(e)
+        }
+        else
+        {
+            responseInterface.onError(e)
+        }
+        null
     }
 }
