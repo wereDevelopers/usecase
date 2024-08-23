@@ -57,5 +57,9 @@ class HomeViewModel : BaseViewModel() {
     fun getMessageCache(id: String) {
         getMessageFromCacheUseCase.invoke(id)
     }
+
+    fun getStartMessage(responseInterface: ResponseInterface): String? {
+        return getStartMessageUseCase.executeWithCatch(responseInterface)
+    }
 }
 ```
